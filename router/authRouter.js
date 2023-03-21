@@ -10,7 +10,7 @@ router.get('/all-users', getAllUsers)
 router.get('/:id', authMiddleware, isAdmin,getaUser)
 router.delete('/:id', deleteaUser)
 // router.patch('/:id', updateaUser)
-router.put('/:id', updateaUser)
+router.put('/edit-user',authMiddleware, updateaUser)
 
 
 export default router

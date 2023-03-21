@@ -22,7 +22,7 @@ const authMiddleware = asyncHandler(async (req, res, next) => {
     }
 
 })
-
+// check admin co quyền đc sửa tk user
 const isAdmin = asyncHandler(async (req, res, next) => {
     const { email } = req.user;
     const adminUser = await User.findOne({ email });
