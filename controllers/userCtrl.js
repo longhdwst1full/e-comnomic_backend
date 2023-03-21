@@ -78,4 +78,50 @@ const updateaUser = asyncHandler(async (req, res) => {
         throw new Error(error)
     }
 })
-export { createUser, loginUserCtrl, getAllUsers, deleteaUser, getaUser, updateaUser }
+
+
+const blockUser = asyncHandler(async (req, res) => {
+    const { id } = req.params
+    try {
+        const block = await User.findByIdAndUpdate(
+            id,
+            { isBlocked: true },
+            { new: true }
+        )
+        res.json({
+            message: "User blocked",
+            data: block
+        })
+
+    } catch (error) {
+        throw new Error(error)
+    }
+})
+
+const unblockUser = asyncHandler(async (req, res) => {
+    const { id } = req.params
+    try {
+        const unblock = await User.findByIdAndUpdate(
+            id,
+            { isBlocked: false },
+            { new: true }
+        )
+
+        res.json({
+            message: "User unblocked",
+            data: unblock
+        })
+    } catch (error) {
+        throw new Error(error)
+    }
+})
+
+export {
+    createUser,
+    loginUserCtrl,
+    getAllUsers,
+    deleteaUser,
+    blockUser,
+    getaUser,
+    updateaUser, unblockUser
+}
