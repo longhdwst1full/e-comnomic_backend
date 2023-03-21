@@ -1,6 +1,7 @@
 import User from "../model/userModel"
 import asyncHandler from 'express-async-handler';
 import { generateToken } from "../config/jwtToken";
+import { validateMongodb } from "../utils/validateMongdb";
 
 const createUser = asyncHandler(async (req, res) => {
     const findUser = await User.findOne({ email: req.body?.email })
@@ -44,8 +45,10 @@ const getAllUsers = asyncHandler(async (req, res) => {
 })
 // get a single user
 const getaUser = asyncHandler(async (req, res) => {
+    const { id } = req.params
+    // check id 
+    validateMongodb(id)
     try {
-        const { id } = req.params
         const result = await User.findById(id)
         res.json(result)
     } catch (error) {
@@ -54,8 +57,11 @@ const getaUser = asyncHandler(async (req, res) => {
 })
 // detete a single user
 const deleteaUser = asyncHandler(async (req, res) => {
+    const { id } = req.params
+    validateMongodb(id);
+
     try {
-        const userDelete = await User.findByIdAndDelete(req.params?.id)
+        const userDelete = await User.findByIdAndDelete(id)
         return res.json(userDelete)
     } catch (error) {
         throw new Error(error)
@@ -64,6 +70,8 @@ const deleteaUser = asyncHandler(async (req, res) => {
 // update 
 const updateaUser = asyncHandler(async (req, res) => {
     const { _id } = req.user;
+    // check id 
+    validateMongodb(_id)
     try {
         const result = await User.findByIdAndUpdate(_id, {
             firstName: req?.body?.firstName,
@@ -82,6 +90,7 @@ const updateaUser = asyncHandler(async (req, res) => {
 
 const blockUser = asyncHandler(async (req, res) => {
     const { id } = req.params
+    validateMongodb(id)
     try {
         const block = await User.findByIdAndUpdate(
             id,
@@ -100,6 +109,7 @@ const blockUser = asyncHandler(async (req, res) => {
 
 const unblockUser = asyncHandler(async (req, res) => {
     const { id } = req.params
+    validateMongodb(id)
     try {
         const unblock = await User.findByIdAndUpdate(
             id,
