@@ -1,5 +1,5 @@
 import express from 'express';
-import { blockUser, createUser, deleteaUser, getAllUsers, getaUser, loginUserCtrl, unblockUser, updateaUser } from '../controllers/userCtrl';
+import { blockUser, createUser, deleteaUser, getAllUsers, getaUser, handleRefreshToken, loginUserCtrl, logout, unblockUser, updateaUser } from '../controllers/userCtrl';
 import { authMiddleware, isAdmin } from '../middlewares/authMiddlewares';
 
 const router = express.Router();
@@ -7,6 +7,8 @@ const router = express.Router();
 router.post('/register', createUser)
 router.post('/login', loginUserCtrl)
 router.get('/all-users', getAllUsers)
+router.get('/refresh', handleRefreshToken)
+router.get('/logout', logout)
 router.get('/:id', authMiddleware, isAdmin, getaUser)
 router.delete('/:id', deleteaUser)
 // router.patch('/:id', updateaUser)
