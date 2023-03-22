@@ -1,7 +1,9 @@
 import express from 'express';
 import dotenv from "dotenv"
 import dbConnect from './config/db';
-import router from './router/authRouter';
+import routerUser from './router/authRouter';
+import routerProduct from './router/productsRouter';
+import morgan from 'morgan';
 import { errHandler, notFound } from './middlewares/errorHanler';
 import cookieParser from 'cookie-parser';
 
@@ -9,10 +11,12 @@ dotenv.config()
 
 const app = express()
 dbConnect()
+app.use(morgan("dev"))
 app.use(express.json())
 app.use(cookieParser())
 
-app.use("/api/user", router)
+app.use("/api/user", routerUser)
+app.use("/api/product", routerProduct)
 
 app.use(notFound)
 
