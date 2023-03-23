@@ -5,13 +5,14 @@ import {
     getAllProducts,
     getaProduct, updateProduct
 } from "../controllers/productsCtrl";
+import { authMiddleware, isAdmin } from "../middlewares/authMiddlewares";
 
 const router = express.Router();
 
-router.post("/", createProduct)
+router.post("/", authMiddleware, isAdmin, createProduct)
 router.get("/:id", getaProduct)
+router.put("/:id", authMiddleware, isAdmin, updateProduct)
+router.delete("/:id", authMiddleware, isAdmin, deleteProduct)
 router.get("/", getAllProducts)
-router.put("/:id", updateProduct)
-router.delete("/:id", deleteProduct)
 
 export default router

@@ -7,6 +7,7 @@ import morgan from 'morgan';
 import { errHandler, notFound } from './middlewares/errorHanler';
 import cookieParser from 'cookie-parser';
 
+// 3:30:00
 dotenv.config()
 
 const app = express()
