@@ -6,14 +6,14 @@ import routerProduct from './router/productsRouter';
 import morgan from 'morgan';
 import { errHandler, notFound } from './middlewares/errorHanler';
 import cookieParser from 'cookie-parser';
-
+import bodyParser from 'body-parser';
 // 3:30:00
 dotenv.config()
 
 const app = express()
 dbConnect()
 app.use(morgan("dev"))
-app.use(express.json())
+app.use(bodyParser.json())
 app.use(cookieParser())
 
 app.use("/api/user", routerUser)

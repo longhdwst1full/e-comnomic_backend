@@ -4,6 +4,8 @@ import { generateToken } from "../config/jwtToken";
 import { validateMongodb } from "../utils/validateMongdb";
 import { generateRefreshToken } from "../config/refreshToken";
 import jwt from "jsonwebtoken";
+import sendEmail from "./emailCtrl";
+import crypto from "crypto"
 
 const createUser = asyncHandler(async (req, res) => {
     const findUser = await User.findOne({ email: req.body?.email })
@@ -92,7 +94,7 @@ const logout = asyncHandler(async (req, res) => {
         httpOnly: true,
         secure: true,
     });
-     res.sendStatus(204); // forbidden
+    res.sendStatus(204); // forbidden
 })
 
 // get all uers
@@ -187,7 +189,86 @@ const unblockUser = asyncHandler(async (req, res) => {
     }
 })
 
+
+// update password 
+const updatePassword = asyncHandler(async (req, res) => {
+    const { _id } = req.user;
+    const { password } = req.body
+    validateMongodb(_id)
+    const user = await User.findById(_id);
+    if (password) {
+        user.password = password;
+        const updatePassword = await user.save();
+        res.json(updatePassword);
+
+    }
+    else {
+        res.json(user)
+    }
+})
+
+// forgot password token
+const forgotPasswordToken = asyncHandler(async (req, res) => {
+    const { email } = req.body
+    const user = await User.findOne({ email })
+    if (!user) throw new Error(`User not found with this email`);
+    try {
+        // Generate a password reset token
+        const resetToken = crypto.randomBytes(20).toString('hex');
+
+        // Set the token and expiration time on the user object
+        user.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+        user.passwordResetExpires = Date.now() + 3600000; // 1 hour
+        await user.save();
+
+        // const token = await user.createPasswordResetToken();
+        const resetURL = `Hi, please follow this link ti reset your Password . This link is valid till 10 minutes from now . <a href="http://localhost:5000/api/user/reset-password/${resetToken}">Click here</a>`
+        const data = {
+            to: email,
+            text: "Hey User",
+            subject: "Forgot Password link",
+            html: resetURL
+
+        };
+        sendEmail(data);
+        res.json(resetToken)
+    } catch (error) {
+        throw new Error(error)
+    }
+})
+
+// reset password 
+const resetPassword = asyncHandler(async (req, res) => {
+    const { password } = req.body;
+    const { token } = req.params;
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+    console.log(hashedToken, "hashed token")
+    const user = await User.findOne({
+        passwordResetToken: hashedToken,
+        passwordResetExpires: { $gt: Date.now() }
+    });
+    console.log(user, "uer_df")
+    if (!user) throw new Error('Token Expired, Please try again later');
+    user.password = password;
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    await user.save();
+    res.json(user)
+
+    // 
+    // Reset the user's password and clear the reset token and expiration time
+    user.password = password;
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+
+    // Save the updated user object
+    await user.save();
+
+    res.status(200).json({ message: 'Password reset successful' });
+})
 export {
+    resetPassword,
+    forgotPasswordToken,
     createUser,
     loginUserCtrl,
     getAllUsers,
@@ -197,5 +278,6 @@ export {
     updateaUser,
     unblockUser,
     handleRefreshToken,
-    logout
+    logout,
+    updatePassword
 }
