@@ -218,7 +218,7 @@ const forgotPasswordToken = asyncHandler(async (req, res) => {
 
         // Set the token and expiration time on the user object
         user.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
-        user.passwordResetExpires = Date.now() + 3600000; // 1 hour
+        user.passwordResetExpires = Date.now() + 600000; // 10 phút
         await user.save();
 
         // const token = await user.createPasswordResetToken();
@@ -242,12 +242,12 @@ const resetPassword = asyncHandler(async (req, res) => {
     const { password } = req.body;
     const { token } = req.params;
     const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
-    console.log(hashedToken, "hashed token")
+   
     const user = await User.findOne({
         passwordResetToken: hashedToken,
         passwordResetExpires: { $gt: Date.now() }
     });
-    console.log(user, "uer_df")
+    
     if (!user) throw new Error('Token Expired, Please try again later');
     user.password = password;
     user.passwordResetToken = undefined;
