@@ -8,6 +8,7 @@ import { errHandler, notFound } from './middlewares/errorHanler';
 import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
 import routerBlog from './router/blogRouter';
+import routerCategory from './router/prodcategoryRouter';
 // 3:30:00
 dotenv.config()
 
@@ -20,6 +21,7 @@ app.use(cookieParser())
 app.use("/api/user", routerUser)
 app.use("/api/product", routerProduct)
 app.use("/api/blog", routerBlog)
+app.use("/api/category", routerCategory)
 
 app.use(notFound)
 
