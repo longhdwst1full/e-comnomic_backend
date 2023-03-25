@@ -21,7 +21,7 @@ const updateProduct = asyncHandler(async (req, res) => {
         if (req.body.title) {
             req.body.slug = slugify(req.body.title)
         }
-        const updateProduct = await Product.findOneAndUpdate({ id }, req.body, {
+        const updateProduct = await Product.findByIdAndUpdate(id, req.body, {
             new: true
         })
         res.json(updateProduct)
@@ -46,7 +46,7 @@ const getaProduct = asyncHandler(async (req, res) => {
     const { id } = req.params
 
     try {
-        const findProduct = await Product.findByID(id)
+        const findProduct = await Product.findById(id)
         res.json(findProduct)
 
     } catch (error) {
