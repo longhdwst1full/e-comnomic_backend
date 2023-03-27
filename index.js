@@ -11,6 +11,7 @@ import routerBlog from './router/blogRouter';
 import routerCategory from './router/prodcategoryRouter';
 import routerBlogCategory from './router/blogCartRoute';
 import routerBrand from './router/brandRouter';
+import routerCoupon from './router/couponRouter';
 // 3:30:00
 dotenv.config()
 
@@ -26,6 +27,7 @@ app.use("/api/blog", routerBlog)
 app.use("/api/category", routerCategory)
 app.use("/api/blogcategory", routerBlogCategory)
 app.use("/api/brand", routerBrand)
+app.use("/api/coupon", routerCoupon)
 
 app.use(notFound)
 

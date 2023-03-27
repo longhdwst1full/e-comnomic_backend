@@ -3,6 +3,8 @@ import User from "../model/userModel"
 import asyncHandler from "express-async-handler"
 import { validateMongodb } from "../utils/validateMongdb"
 import slugify from "slugify"
+import cloudinaryUploadImg from "../utils/cloudinary"
+import fs from "fs";
 
 const createProduct = asyncHandler(async (req, res) => {
     try {
@@ -201,7 +203,43 @@ const rating = asyncHandler(async (req, res) => {
         throw new Error(error)
     }
 })
+
+
+// upload anh
+const uploadImages = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    console.log("id ",id)
+    validateMongodb(id);
+    
+    try {
+        const uploader = (path) => cloudinaryUploadImg(path, "images");
+        const urls = []
+        const files = req.files;
+        for (const file of files) {
+            const { path } = file;
+           
+            const newpath = await uploader(path);
+            urls.push(newpath);
+            fs.unlinkSync(path);
+            console.log(newpath,"test")
+        }
+        console.log(files,"test file")
+        const findProduct = await Product.findByIdAndUpdate(id, {
+            images: urls.map(file => {
+                return file
+            }),
+
+        }, {
+            new: true
+        });
+        res.json(findProduct);
+        
+    } catch (error) {
+        throw new Error(error)
+    }
+})
 export {
+    uploadImages,
     getAllProducts,
     getaProduct,
     createProduct,

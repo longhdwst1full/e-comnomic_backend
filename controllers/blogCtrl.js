@@ -1,6 +1,7 @@
-
+import fs from "fs";
 import asyncHandler from "express-async-handler"
 import Blog from "../model/blogModel"
+import cloudinaryUploadImg from "../utils/cloudinary"
 import { validateMongodb } from "../utils/validateMongdb"
 
 
@@ -31,9 +32,9 @@ const getBlog = asyncHandler(async (req, res) => {
     validateMongodb(id)
     try {
         const newBlog = await Blog.findById(id)
-        .populate("likes")
-        .populate("dislikes");
-    const update= await Blog.findByIdAndUpdate(id,
+            .populate("likes")
+            .populate("dislikes");
+        const update = await Blog.findByIdAndUpdate(id,
             { $inc: { numViews: 1 } },
             { new: true });
         res.json(newBlog)
@@ -155,6 +156,38 @@ const disLiketheBlog = asyncHandler(async (req, res) => {
 });
 
 
+const uploadImages = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    console.log(id,"id test")
+    validateMongodb(id);
+
+    try {
+        const uploader = (path) => cloudinaryUploadImg(path, "images");
+        const urls = []
+        const files = req.files;
+        for (const file of files) {
+            const { path } = file;
+            const newpath = await uploader(path);
+            urls.push(newpath);
+            fs.unlinkSync(path)
+        }
+        console.log(files,"test file blog")
+
+        const findBlog = await Blog.findByIdAndUpdate(id, {
+            images: urls.map(file => {
+                return file
+            }),
+
+        }, {
+            new: true
+        });
+        res.json(findBlog);
+
+    } catch (error) {
+        throw new Error(error)
+    }
+})
+
 export {
     getBlog,
     updateBlog,
@@ -162,5 +195,6 @@ export {
     deleteBlog,
     getAllBlog,
     likeBlog,
-    disLiketheBlog
+    disLiketheBlog,
+    uploadImages
 }
