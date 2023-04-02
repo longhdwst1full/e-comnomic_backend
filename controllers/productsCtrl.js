@@ -120,7 +120,7 @@ const addToWishlist = asyncHandler(async (req, res) => {
     const { prodId } = req.body;
     try {
         const user = await User.findById(_id);
-        const alreadyadded = user.wishlist.find((id) => id.toString() != prodId);
+        const alreadyadded = user.wishlist.find((id) => id.toString() === prodId);
 
         if (alreadyadded) {
             let user = await User.findByIdAndUpdate(_id,
@@ -208,7 +208,7 @@ const rating = asyncHandler(async (req, res) => {
 // upload anh
 const uploadImages = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    console.log("id ",id)
+   
     validateMongodb(id);
     
     try {
@@ -217,13 +217,12 @@ const uploadImages = asyncHandler(async (req, res) => {
         const files = req.files;
         for (const file of files) {
             const { path } = file;
-           
             const newpath = await uploader(path);
             urls.push(newpath);
             fs.unlinkSync(path);
-            console.log(newpath,"test")
+            
         }
-        console.log(files,"test file")
+     
         const findProduct = await Product.findByIdAndUpdate(id, {
             images: urls.map(file => {
                 return file

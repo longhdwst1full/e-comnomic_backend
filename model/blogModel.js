@@ -34,8 +34,8 @@ const blogSchema = new mongoose.Schema({
     ],
     dislikes: [
         {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User"
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User"
         },
     ],
     images: [],
@@ -51,7 +51,8 @@ const blogSchema = new mongoose.Schema({
         toObject: {
             virtuals: true,
         },
-        timestamps: true
+        timestamps: true,
+        versionKey:false,
     }
 )
 

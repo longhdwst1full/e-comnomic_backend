@@ -1,21 +1,25 @@
 import mongoose from "mongoose";
 
-const couponSchema= new mongoose.Schema({
-    name:{
+const couponSchema = new mongoose.Schema({
+    name: {
         type: String,
         required: true,
         unique: true,
         uppercase: true,
     },
-    expiry:{
-        type:Date,
+    expiry: {
+        type: Date,
         required: true,
     },
-    discount:{
-        type:Number,
+    discount: {
+        type: Number,
         required: true,
     }
+}, {
+    timestamps: true,
+    versionKey: false,
+
 })
 
 
-export default  mongoose.model("Coupon", couponSchema)
+export default mongoose.model("Coupon", couponSchema)

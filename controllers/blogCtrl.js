@@ -158,7 +158,6 @@ const disLiketheBlog = asyncHandler(async (req, res) => {
 
 const uploadImages = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    console.log(id,"id test")
     validateMongodb(id);
 
     try {
@@ -171,8 +170,7 @@ const uploadImages = asyncHandler(async (req, res) => {
             urls.push(newpath);
             fs.unlinkSync(path)
         }
-        console.log(files,"test file blog")
-
+        
         const findBlog = await Blog.findByIdAndUpdate(id, {
             images: urls.map(file => {
                 return file

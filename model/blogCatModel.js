@@ -2,16 +2,17 @@ import mongoose from "mongoose";
 
 
 const blogCateSchema = new mongoose.Schema({
-    title:{
+    title: {
         type: String,
         unique: true,
-        index:true,
+        index: true,
         required: true
     }
 },
     {
-       
-        timestamps: true
+
+        timestamps: true,
+        versionKey: false,
     }
 )
 
