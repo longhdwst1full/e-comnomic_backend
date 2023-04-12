@@ -9,13 +9,9 @@ const __dirname = path.dirname(__filename);
 const multerStorage = multer.diskStorage({
     destination: function (req, file, cb) {
 
-        // const uploadPath = path.join(__dirname, '../public//images');
-        cb(null, path.join(__dirname, '../public/images'));
-        // cb(null, uploadPath);
-
-        // fs.mkdir('./uploads/',(err)=>{
-        //     cb(null, './uploads/');
-        //  });
+     
+        cb(null, path.join(__dirname, '../public/images/'));
+        
     },
     filename: function (req, file, cb) {
         const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
@@ -37,7 +33,7 @@ const multerFilter = (req, file, cb) => {
 const uploadPhoto = multer({
     storage: multerStorage,
     fileFilter: multerFilter,
-    limits: { fieldSize: 2000000 }
+    limits: { fieldSize: 1000000 }
 })
 
 const productImageResize = async (req, res, next) => {

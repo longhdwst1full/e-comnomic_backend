@@ -1,5 +1,6 @@
 import Brand from "../model/brandModel"
 import asyncHandler from "express-async-handler"
+import { validateMongodb } from "../utils/validateMongdb"
 
 const createBrand = asyncHandler(async (req, res) => {
     try {
@@ -13,9 +14,10 @@ const createBrand = asyncHandler(async (req, res) => {
 //update 
 const updateBrand = asyncHandler(async (req, res) => {
     const { id } = req.params;
+    validateMongodb(id)
     try {
 
-        const updateProduct = await Brand.findByIdAndUpdate( id , req.body, {
+        const updateProduct = await Brand.findByIdAndUpdate(id, req.body, {
             new: true
         })
         res.json(updateProduct)
@@ -27,6 +29,7 @@ const updateBrand = asyncHandler(async (req, res) => {
 //delete 
 const deleteBrand = asyncHandler(async (req, res) => {
     const { id } = req.params;
+    validateMongodb(id)
     try {
 
         const deleteProduct = await Brand.findOneAndDelete(id)
@@ -41,7 +44,7 @@ const deleteBrand = asyncHandler(async (req, res) => {
 
 const getaBrand = asyncHandler(async (req, res) => {
     const { id } = req.params
-
+    validateMongodb(id)
     try {
         const findProduct = await Brand.findById(id)
         res.json(findProduct)

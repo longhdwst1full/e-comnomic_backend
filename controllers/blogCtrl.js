@@ -1,8 +1,8 @@
 import fs from "fs";
 import asyncHandler from "express-async-handler"
 import Blog from "../model/blogModel"
-import cloudinaryUploadImg from "../utils/cloudinary"
 import { validateMongodb } from "../utils/validateMongdb"
+import { cloudinaryUploadImg } from "../utils/cloudinary";
 
 
 const createBlog = asyncHandler(async (req, res) => {
@@ -170,7 +170,7 @@ const uploadImages = asyncHandler(async (req, res) => {
             urls.push(newpath);
             fs.unlinkSync(path)
         }
-        
+
         const findBlog = await Blog.findByIdAndUpdate(id, {
             images: urls.map(file => {
                 return file

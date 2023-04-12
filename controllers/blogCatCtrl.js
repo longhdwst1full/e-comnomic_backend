@@ -15,9 +15,10 @@ const createCategory = asyncHandler(async (req, res) => {
 //update 
 const updateCategory = asyncHandler(async (req, res) => {
     const { id } = req.params;
+    validateMongodb(id)
     try {
 
-        const updateProduct = await BCategory.findByIdAndUpdate( id , req.body, {
+        const updateProduct = await BCategory.findByIdAndUpdate(id, req.body, {
             new: true
         })
         res.json(updateProduct)
@@ -29,6 +30,7 @@ const updateCategory = asyncHandler(async (req, res) => {
 //delete 
 const deleteCategory = asyncHandler(async (req, res) => {
     const { id } = req.params;
+    validateMongodb(id)
     try {
 
         const deleteProduct = await BCategory.findOneAndDelete(id)
@@ -43,7 +45,7 @@ const deleteCategory = asyncHandler(async (req, res) => {
 
 const getaCategory = asyncHandler(async (req, res) => {
     const { id } = req.params
-
+    validateMongodb(id)
     try {
         const findProduct = await BCategory.findById(id)
         res.json(findProduct)

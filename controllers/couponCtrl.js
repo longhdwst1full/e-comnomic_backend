@@ -18,7 +18,7 @@ const updateCoupon = asyncHandler(async (req, res) => {
     validateMongodb(id)
     try {
 
-        const updateCoupon = await Coupon.findByIdAndUpdate( id , req.body, {
+        const updateCoupon = await Coupon.findByIdAndUpdate(id, req.body, {
             new: true
         })
         res.json(updateCoupon)
@@ -45,7 +45,7 @@ const deleteCoupon = asyncHandler(async (req, res) => {
 
 const getaCoupon = asyncHandler(async (req, res) => {
     const { id } = req.params
-validateMongodb(id)
+    validateMongodb(id)
     try {
         const findCoupon = await Coupon.findById(id)
         res.json(findCoupon)
@@ -59,7 +59,7 @@ const getAllCoupon = asyncHandler(async (req, res) => {
     try {
         const result = await Coupon.find();
         res.status(200).json(result)
-        
+
     } catch (error) {
         throw new Error(error)
     }
