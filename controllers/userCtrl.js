@@ -60,7 +60,7 @@ const loginUserCtrl = asyncHandler(async (req, res) => {
 })
 
 // admin a user
-const loginAdminCtrl = asyncHandler(async (req, res) => {
+const loginAdmin = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
     // check admin exists or not
     const findAdmin = await User.findOne({ email });
@@ -119,10 +119,12 @@ const handleRefreshToken = asyncHandler(async (req, res) => {
 
 //logout functionality
 const logout = asyncHandler(async (req, res) => {
-    const cookie = req.cookies
-    if (!cookie?.refreshToken) throw new Error("No refresh token in cookies");
+    const cookie = req.cookies;
+    if (!cookie?.refreshToken) throw new Error("No Refresh Token in Cookies");
+
     const refreshToken = cookie.refreshToken;
-    const user = await User.findOne({ refreshToken })
+    const user = await User.findOne({ refreshToken });
+
     if (!user) {
         res.clearCookie("refreshToken", {
             httpOnly: true,
@@ -132,13 +134,15 @@ const logout = asyncHandler(async (req, res) => {
     }
     await User.findOneAndUpdate(refreshToken, {
         refreshToken: "",
-    })
+    });
+
     res.clearCookie("refreshToken", {
         httpOnly: true,
         secure: true,
     });
     res.sendStatus(204); // forbidden
-})
+});
+
 
 // get all uers
 const getAllUsers = asyncHandler(async (req, res) => {
@@ -174,7 +178,7 @@ const deleteaUser = asyncHandler(async (req, res) => {
     }
 })
 // update  a user
-const updateaUser = asyncHandler(async (req, res) => {
+const updatedUser = asyncHandler(async (req, res) => {
     const { _id } = req.user;
     // check id 
     validateMongodb(_id)
@@ -204,7 +208,6 @@ const blockUser = asyncHandler(async (req, res) => {
             { new: true }
         )
         res.json({
-            message: "User blocked",
             data: block
         })
 
@@ -216,6 +219,7 @@ const blockUser = asyncHandler(async (req, res) => {
 const unblockUser = asyncHandler(async (req, res) => {
     const { id } = req.params
     validateMongodb(id)
+
     try {
         const unblock = await User.findByIdAndUpdate(
             id,
@@ -292,6 +296,7 @@ const resetPassword = asyncHandler(async (req, res) => {
     });
 
     if (!user) throw new Error('Token Expired, Please try again later');
+
     user.password = password;
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
@@ -311,8 +316,9 @@ const resetPassword = asyncHandler(async (req, res) => {
 })
 
 
-const getWishList = asyncHandler(async (req, res) => {
+const getWishlist = asyncHandler(async (req, res) => {
     const { _id } = req.user;
+
     try {
         const findUser = await User.findById(_id).populate("wishlist");
         res.json(findUser);
@@ -325,6 +331,7 @@ const getWishList = asyncHandler(async (req, res) => {
 const saveAddress = asyncHandler(async (req, res) => {
     const { _id } = req.user;
     validateMongodb(_id)
+
     try {
         const updateUserAddress = await User.findByIdAndUpdate(_id, {
             address: req?.body?.address,
@@ -342,15 +349,18 @@ const userCart = asyncHandler(async (req, res) => {
     const { cart } = req.body;
     const { _id } = req.user;
     validateMongodb(_id);
+
     try {
         let products = []
         const user = await User.findById(_id);
         // check if user already hava product in cart
         const aleadyExistCart = await Cart.findOne({ orderby: user._id })
+
         if (aleadyExistCart) {
             aleadyExistCart.remove();
 
         }
+
         for (let i = 0; i < cart.length; i++) {
             let object = {};
             object.product = cart[i]._id;
@@ -375,7 +385,8 @@ const userCart = asyncHandler(async (req, res) => {
         res.json(newCart);
 
 
-    } catch (error) {
+    }
+    catch (error) {
         throw new Error(error)
     }
 })
@@ -390,64 +401,72 @@ const getUserCart = asyncHandler(async (req, res) => {
             // "_id title price totalAfterDiscount"
         )
         res.json(cart)
+
     } catch (error) {
         throw new Error(error)
     }
 })
 
-const emotyCart = asyncHandler(async (req, res) => {
+const emptyCart = asyncHandler(async (req, res) => {
     const { _id } = req.user;
     validateMongodb(_id);
-
     try {
-        const user = await User.findOne({ _id })
-        const cart = await Cart.findOneAndRemove({ orderby: user._id }).populate("products.product"
-
-        )
-        res.json(cart)
+        const user = await User.findOne({ _id });
+        const cart = await Cart.findOneAndRemove({ orderby: user._id });
+        res.json(cart);
     } catch (error) {
-        throw new Error(error)
+        throw new Error(error);
     }
-})
+});
 
 
 // phieu mua hang : counpon 
 const applyCoupon = asyncHandler(async (req, res) => {
     const { coupon } = req.body;
     const { _id } = req.user;
-    validateMongodb(_id)
+    validateMongodb(_id);
+
     const validCoupon = await Coupon.findOne({ name: coupon });
     if (validCoupon === null) {
-        throw new Error("Invalid coupon");
-
+        throw new Error("Invalid Coupon");
     }
     const user = await User.findOne({ _id });
     let { cartTotal } = await Cart.findOne({
         orderby: user._id,
     }).populate("products.product");
-    let totalAfterDiscount = (cartTotal - (cartTotal * validCoupon.discount) / 100).toFixed(2);
+
+    let totalAfterDiscount = (
+        cartTotal -
+        (cartTotal * validCoupon.discount) / 100
+    ).toFixed(2);
+
     await Cart.findOneAndUpdate(
-        {orderby: user._id},
-         { totalAfterDiscount: totalAfterDiscount },
+        { orderby: user._id },
+        { totalAfterDiscount },
         { new: true }
     );
     res.json(totalAfterDiscount);
-})
+});
+
 
 
 const createOrder = asyncHandler(async (req, res) => {
     const { COD, couponApplied } = req.body;
     const { _id } = req.user;
     validateMongodb(_id);
+
     try {
         if (!COD) throw new Error("Create cash order failed");
+
         const user = await User.findById(_id);
         let userCart = await Cart.findOne({ orderby: user._id });
         let finalAmout = 0;
+
         if (couponApplied && userCart.totalAfterDiscount) {
             finalAmout = userCart.totalAfterDiscount;
 
-        } else {
+        }
+        else {
             finalAmout = userCart.cartTotal;
         }
         let newOrder = await new Order({
@@ -463,6 +482,7 @@ const createOrder = asyncHandler(async (req, res) => {
             orderby: user._id,
             orderStatus: "Cash on Delivery",
         }).save();
+
         let update = userCart.products.map(item => {
             return {
                 updateOne: {
@@ -471,6 +491,7 @@ const createOrder = asyncHandler(async (req, res) => {
                 },
             };
         });
+
         const udpated = await Product.bulkWrite(update, {});
         res.json({ message: "success" })
     } catch (error) {
@@ -482,18 +503,36 @@ const createOrder = asyncHandler(async (req, res) => {
 const getOrders = asyncHandler(async (req, res) => {
     const { _id } = req.user;
     validateMongodb(_id);
+
     try {
-        const userOrder = await Order.findOne({ orderby: _id }).populate("products.product").exec();
+        const userOrder = await Order.findOne({ orderby: _id })
+            .populate("products.product")
+            .populate("orderby")
+            .exec();
         res.json(userOrder)
     } catch (error) {
         throw new Error(error)
     }
 })
 
+const getAllOrders = asyncHandler(async (req, res) => {
+    try {
+        const alluserorders = await Order.find()
+            .populate("products.product")
+            .populate("orderby")
+            .exec();
+        res.json(alluserorders);
+    } catch (error) {
+        throw new Error(error);
+    }
+});
+
+
 const updateOrderStatus = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    validateMongodb(id)
     const { status } = req.body;
+    validateMongodb(id)
+
     try {
         const updateOrderStatus = await Order.findByIdAndUpdate(id, {
             orderStatus: status,
@@ -510,22 +549,28 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
     }
 
 })
+
+const getOrderByUserId = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    validateMongodb(id);
+    try {
+        const userorders = await Order.findOne({ orderby: id })
+            .populate("products.product")
+            .populate("orderby")
+            .exec();
+        res.json(userorders);
+    } catch (error) {
+        throw new Error(error);
+    }
+});
+
 export {
-    updateOrderStatus,
-    getOrders,
-    createOrder,
-    applyCoupon,
-    emotyCart,
-    getUserCart,
-    userCart,
-    saveAddress,
-    getWishList,
     createUser,
     loginUserCtrl,
-    getaUser,
     getAllUsers,
+    getaUser,
     deleteaUser,
-    updateaUser,
+    updatedUser,
     blockUser,
     unblockUser,
     handleRefreshToken,
@@ -533,5 +578,16 @@ export {
     updatePassword,
     forgotPasswordToken,
     resetPassword,
-    loginAdminCtrl
+    loginAdmin,
+    getWishlist,
+    saveAddress,
+    userCart,
+    getUserCart,
+    emptyCart,
+    applyCoupon,
+    createOrder,
+    getOrders,
+    updateOrderStatus,
+    getAllOrders,
+    getOrderByUserId,
 }
