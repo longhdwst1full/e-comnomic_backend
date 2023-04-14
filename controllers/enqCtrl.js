@@ -32,7 +32,7 @@ const deleteEnquiry = asyncHandler(async (req, res) => {
     validateMongodb(id)
     try {
 
-        const deleteProduct = await Enquiry.findOneAndDelete(id)
+        const deleteProduct = await Enquiry.deleteOne({ _id: id })
         res.json({
             message: "Xoa thanh cong",
             data: deleteProduct

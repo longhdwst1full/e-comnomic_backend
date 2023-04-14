@@ -33,7 +33,7 @@ const deleteCoupon = asyncHandler(async (req, res) => {
     validateMongodb(id)
     try {
 
-        const deleteCoupon = await Coupon.findOneAndDelete(id)
+        const deleteCoupon = await Coupon.deleteOne({ _id: id })
         res.json({
             message: "Xoa thanh cong",
             data: deleteCoupon

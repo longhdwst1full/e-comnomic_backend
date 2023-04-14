@@ -33,7 +33,7 @@ const deleteCategory = asyncHandler(async (req, res) => {
     validateMongodb(id)
     try {
 
-        const deleteProduct = await BCategory.findOneAndDelete(id)
+        const deleteProduct = await BCategory.deleteOne({ _id: id })
         res.json({
             message: "Xoa thanh cong",
             data: deleteProduct

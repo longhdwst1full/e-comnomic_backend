@@ -15,7 +15,7 @@ const updateCategory = asyncHandler(async (req, res) => {
     const { id } = req.params;
     try {
 
-        const updateProduct = await PCategory.findByIdAndUpdate( id , req.body, {
+        const updateProduct = await PCategory.findByIdAndUpdate(id, req.body, {
             new: true
         })
         res.json(updateProduct)
@@ -29,7 +29,7 @@ const deleteCategory = asyncHandler(async (req, res) => {
     const { id } = req.params;
     try {
 
-        const deleteProduct = await PCategory.findOneAndDelete(id)
+        const deleteProduct = await PCategory.deleteOne({ _id: id })
         res.json({
             message: "Xoa thanh cong",
             data: deleteProduct
