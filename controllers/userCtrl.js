@@ -503,7 +503,7 @@ const createOrder = asyncHandler(async (req, res) => {
 const getOrders = asyncHandler(async (req, res) => {
     const { _id } = req.user;
     validateMongodb(_id);
-
+    
     try {
         const userOrder = await Order.findOne({ orderby: _id })
             .populate("products.product")
