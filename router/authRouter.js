@@ -9,6 +9,7 @@ import {
     forgotPasswordToken,
     getAllOrders,
     getAllUsers,
+    getOrderByUserId,
     getOrders,
     getUserCart,
     getWishlist,
@@ -45,6 +46,7 @@ router.get('/refresh', handleRefreshToken)
 router.get('/logout', logout)
 router.get('/get-orders', authMiddleware, getOrders)
 router.get("/getallorders", authMiddleware, isAdmin, getAllOrders);
+router.get("/getorderbyuser/:id", authMiddleware, isAdmin, getOrderByUserId);
 router.get('/cart', authMiddleware, getUserCart)
 router.get('/wishlist', authMiddleware, getWishlist)
 router.get('/:id', authMiddleware, getaUser)
