@@ -41,8 +41,8 @@ const deleteProduct = asyncHandler(async (req, res) => {
     const { id } = req.params;
     validateMongodb(id)
     try {
-
-        const deleteProduct = await Product.findOneAndDelete({ id })
+const _id= id
+        const deleteProduct = await Product.findByIdAndDelete(_id)
         res.json(deleteProduct)
     } catch (error) {
         throw new Error(error)
@@ -54,6 +54,7 @@ const getaProduct = asyncHandler(async (req, res) => {
     validateMongodb(id)
     try {
         const findProduct = await Product.findById(id)
+        .populate("color")
         res.json(findProduct)
 
     } catch (error) {
