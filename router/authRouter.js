@@ -18,11 +18,13 @@ import {
     loginAdmin,
     loginUserCtrl,
     logout,
+    removeProductFromCart,
     resetPassword,
     saveAddress,
     unblockUser,
     updateOrderStatus,
     updatePassword,
+    updateQuantityProductFromCart,
     updatedUser,
     userCart
 } from '../controllers/userCtrl';
@@ -54,6 +56,8 @@ router.get('/:id', authMiddleware, getaUser)
 router.put('/order/update-order/:id', authMiddleware, isAdmin, updateOrderStatus)
 
 router.delete('/empty-cart', authMiddleware, emptyCart)
+router.delete('/delete-product-cart', authMiddleware, removeProductFromCart)
+router.post('/update-product-cart/:cartItemId/:newQuantity', authMiddleware, updateQuantityProductFromCart)
 router.delete('/:id', authMiddleware, isAdmin, deleteaUser)
 // router.patch('/:id', updateaUser)
 

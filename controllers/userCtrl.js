@@ -412,6 +412,39 @@ const userCart = asyncHandler(async (req, res) => {
 //     }
 // })
 
+export const removeProductFromCart = asyncHandler(async (req, res) => {
+    const { _id } = req.user
+    const { cartItemId } = req.body
+    validateMongodb(_id);
+    try {
+        const deleteProducts = await Cart.deleteOne({
+            userId: _id,
+            _id: cartItemId
+        })
+        return res.json(deleteProducts);
+    } catch (error) {
+        throw new Error(error)
+    }
+})
+export const updateQuantityProductFromCart = asyncHandler(async (req, res) => {
+    const { _id } = req.user
+    validateMongodb(_id);
+    const { cartItemId, newQuantity } = req.params
+    try {
+         
+        const cartItem = await Cart.findOne({
+            userId: _id,
+            _id: cartItemId
+
+        })
+        
+        cartItem.quantity = newQuantity
+        cartItem.save()
+        return res.json(cartItem);
+    } catch (error) {
+        throw new Error(error)
+    }
+})
 
 const getUserCart = asyncHandler(async (req, res) => {
     const { _id } = req.user;
