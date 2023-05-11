@@ -4,7 +4,7 @@ dotenv.config()
 
 
 const generateRefreshToken = (id) => {
-    return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "3d" })
+    return jwt.sign({ id }, process.env.SECRET_REFRESH, { expiresIn: "3d" })
 }
 
 export { generateRefreshToken }

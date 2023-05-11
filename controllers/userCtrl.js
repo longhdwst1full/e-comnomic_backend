@@ -12,6 +12,9 @@ import jwt from "jsonwebtoken";
 import sendEmail from "./emailCtrl";
 import crypto from "crypto"
 
+import dotenv from 'dotenv'
+dotenv.config()
+
 const createUser = asyncHandler(async (req, res) => {
     const findUser = await User.findOne({ email: req.body?.email })
     if (!findUser) {
@@ -30,29 +33,28 @@ const loginUserCtrl = asyncHandler(async (req, res) => {
     const findUser = await User.findOne({ email });
     if (findUser && (await findUser.isPasswordMatched(password))) {
         // refreshToken 
+        // const token = await generateToken(findUser?._id)
         const refreshToken = await generateRefreshToken(findUser?._id)
         const updateUser = await User.findByIdAndUpdate(
             findUser.id,
             {
+                // token:token,
                 refreshToken: refreshToken
             },
             {
                 new: true
             })
-        res.cookie("refreshToken", refreshToken, {
-            httpOnly: true,
-            maxAge: 72 * 60 * 60 * 1000
-        });
-
-
-        res.json({
+        const response = {
             _id: findUser?._id,
             firstName: findUser?.firstName,
             lastName: findUser?.lastName,
             email: findUser?.email,
             mobile: findUser?.mobile,
-            token: generateToken(findUser?._id)
-        });
+            token: generateToken(findUser?._id),
+            refreshToken
+        }
+
+        res.json(response);
     }
     else {
         throw new Error("Invalid Creadentrals")
@@ -99,22 +101,34 @@ const loginAdmin = asyncHandler(async (req, res) => {
 
 // handle refresh token
 const handleRefreshToken = asyncHandler(async (req, res) => {
-    const cookie = req.cookies;
-    // console.log(cookie);
-    if (!cookie?.refreshToken) throw new Error("No refresh token in cookies");
-    const refreshToken = cookie.refreshToken
-    console.log(refreshToken)
-    const user = await User.findOne({ refreshToken })
-    if (!user) throw new Error("No refresh token present in db or not matched");
 
-    jwt.verify(refreshToken, process.env.JWT_SECRET, (err, decoded) => {
-        console.log(decoded)
-        if (err || user.id !== decoded.id) {
-            throw new Error("There is something wrong with the refresh token")
-        }
+    // refresh the damn token
+    const { refreshToken } = req.body
+    const user = await User.findOne({ refreshToken })
+
+    if (!user || !refreshToken) throw new Error("No refresh token present in db or not matched");
+
+
+
+    if (refreshToken && user) {
+
         const accessToken = generateToken(user?._id)
-        res.json({ accessToken })
-    })
+        const updateUser = await User.findByIdAndUpdate(
+            user?._id,
+            {
+                token: accessToken
+
+            },
+            {
+                new: true
+            })
+        res.json(accessToken)
+
+
+
+    }
+
+
 })
 
 //logout functionality
@@ -321,6 +335,7 @@ const getWishlist = asyncHandler(async (req, res) => {
 
     try {
         const findUser = await User.findById(_id).populate("wishlist");
+        findUser.password = undefined
         res.json(findUser);
     } catch (error) {
         throw new Error(error)
@@ -431,13 +446,11 @@ export const updateQuantityProductFromCart = asyncHandler(async (req, res) => {
     validateMongodb(_id);
     const { cartItemId, newQuantity } = req.params
     try {
-         
         const cartItem = await Cart.findOne({
             userId: _id,
             _id: cartItemId
 
         })
-        
         cartItem.quantity = newQuantity
         cartItem.save()
         return res.json(cartItem);
@@ -504,55 +517,7 @@ const applyCoupon = asyncHandler(async (req, res) => {
 
 
 
-const createOrder = asyncHandler(async (req, res) => {
-    const { COD, couponApplied } = req.body;
-    const { _id } = req.user;
-    validateMongodb(_id);
 
-    try {
-        if (!COD) throw new Error("Create cash order failed");
-
-        const user = await User.findById(_id);
-        let userCart = await Cart.findOne({ orderby: user._id });
-        let finalAmout = 0;
-
-        if (couponApplied && userCart.totalAfterDiscount) {
-            finalAmout = userCart.totalAfterDiscount;
-
-        }
-        else {
-            finalAmout = userCart.cartTotal;
-        }
-        let newOrder = await new Order({
-            products: userCart.products,
-            paymentIntent: {
-                id: uniqid(),
-                method: "COD",
-                amount: finalAmout,
-                status: "Cash on Delivery",
-                created: Date.now(),
-                currency: "usd",
-            },
-            orderby: user._id,
-            orderStatus: "Cash on Delivery",
-        }).save();
-
-        let update = userCart.products.map(item => {
-            return {
-                updateOne: {
-                    filter: { _id: item.product._id },
-                    update: { $inc: { quantity: -item.count, sold: +item.count } }
-                },
-            };
-        });
-
-        const udpated = await Product.bulkWrite(update, {});
-        res.json({ message: "success" })
-    } catch (error) {
-
-        throw new Error(error);
-    }
-})
 
 const getOrders = asyncHandler(async (req, res) => {
     const { _id } = req.user;
@@ -618,7 +583,39 @@ const getOrderByUserId = asyncHandler(async (req, res) => {
     }
 });
 
+const createOrderNew = asyncHandler(async (req, res) => {
+    const { _id } = req.user
+    try {
+        const order = await Order.create({
+            shippingInfo: req.body.shippingInfo,
+            orderItems: req.body.orderItems,
+            totalPrice: req.body.totalPrice,
+            totalPriceAfterDisccount: req.body.totalPriceAfterDisccount,
+            paymentInfo: req.body.paymentInfo,
+            user: _id,
+        })
+        return res.json(order)
+    } catch (error) {
+        throw new Error(error);
+    }
+})
+
+const getMyorder = asyncHandler(async (req, res) => {
+
+    const { _id } = req.user;
+    try {
+        const orders = await Order.find({ user: _id })
+            .populate("orderItems.product")
+            .populate("orderItems.color")
+            .populate("user")
+        res.json(orders)
+    } catch (error) {
+        throw new Error(error)
+    }
+})
 export {
+    getMyorder,
+    createOrderNew,
     createUser,
     loginUserCtrl,
     getAllUsers,
@@ -639,7 +636,6 @@ export {
     getUserCart,
     emptyCart,
     applyCoupon,
-    createOrder,
     getOrders,
     updateOrderStatus,
     getAllOrders,
