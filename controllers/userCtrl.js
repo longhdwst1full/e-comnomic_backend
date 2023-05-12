@@ -276,14 +276,18 @@ const forgotPasswordToken = asyncHandler(async (req, res) => {
     try {
         // Generate a password reset token
         const resetToken = crypto.randomBytes(20).toString('hex');
-
+ 
         // Set the token and expiration time on the user object
-        user.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
-        user.passwordResetExpires = Date.now() + 600000; // 10 phút
-        await user.save();
+        user.passwordResetToken = crypto
+            .createHash('sha256')
+            .update(resetToken)
+            .digest('hex');
 
+        user.passwordResetExpires = Date.now() + 600000; // 10 phút
+       
+        await user.save();
         // const token = await user.createPasswordResetToken();
-        const resetURL = `Hi, please follow this link ti reset your Password . This link is valid till 10 minutes from now . <a href="http://localhost:5000/api/user/reset-password/${resetToken}">Click here</a>`
+        const resetURL = `Hi, please follow this link ti reset your Password . This link is valid till 10 minutes from now . <a href="http://localhost:3000/reset-password/${resetToken}">Click here</a>`
         const data = {
             to: email,
             text: "Hey User",
@@ -292,7 +296,7 @@ const forgotPasswordToken = asyncHandler(async (req, res) => {
 
         };
         sendEmail(data);
-        res.json(resetToken)
+        res.json({ message: "Send link success" })
     } catch (error) {
         throw new Error(error)
     }

@@ -49,7 +49,8 @@ router.post('/order/paymentVerification', authMiddleware, paymentVerification)
 // router.post('/cart/applycoupon', authMiddleware, applyCoupon)
 
 
-router.get('/all-users', getAllUsers)
+router.get('/profile/:id', authMiddleware, getaUser)
+router.get('/all-users', authMiddleware, isAdmin, getAllUsers)
 router.post('/refresh', handleRefreshToken)
 router.get('/logout', logout)
 router.get('/getmyorders', authMiddleware, getMyorder)
@@ -58,7 +59,6 @@ router.get('/getmyorders', authMiddleware, getMyorder)
 
 router.get('/cart', authMiddleware, getUserCart)
 router.get('/wishlist', authMiddleware, getWishlist)
-router.get('/:id', authMiddleware, getaUser)
 
 router.put('/order/update-order/:id', authMiddleware, isAdmin, updateOrderStatus)
 
