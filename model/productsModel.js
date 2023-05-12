@@ -1,4 +1,6 @@
-import mongoose from "mongoose"; // Erase if already required
+import mongoose from "mongoose";
+import mongoosePaginate from 'mongoose-paginate-v2';
+
 
 // Declare the Schema of the Mongo model
 const productSchema = new mongoose.Schema({
@@ -44,7 +46,7 @@ const productSchema = new mongoose.Schema({
         },
     ],
     color: [
-            {
+        {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Color"
         }
@@ -69,5 +71,6 @@ const productSchema = new mongoose.Schema({
     versionKey: false,
 });
 
+productSchema.plugin(mongoosePaginate)
 //Export the model
 export default mongoose.model('Product', productSchema);

@@ -3,6 +3,8 @@ import User from "../model/userModel"
 import asyncHandler from "express-async-handler"
 import { validateMongodb } from "../utils/validateMongdb"
 import slugify from "slugify"
+import PCategory from "../model/prodcategoryModel"
+
 
 import fs from "fs";
 import { cloudinaryUploadImg } from "../utils/cloudinary"
@@ -41,7 +43,7 @@ const deleteProduct = asyncHandler(async (req, res) => {
     const { id } = req.params;
     validateMongodb(id)
     try {
-const _id= id
+        const _id = id
         const deleteProduct = await Product.findByIdAndDelete(_id)
         res.json(deleteProduct)
     } catch (error) {
@@ -54,7 +56,7 @@ const getaProduct = asyncHandler(async (req, res) => {
     validateMongodb(id)
     try {
         const findProduct = await Product.findById(id)
-        .populate("color")
+            .populate("color")
         res.json(findProduct)
 
     } catch (error) {
@@ -64,48 +66,42 @@ const getaProduct = asyncHandler(async (req, res) => {
 
 const getAllProducts = asyncHandler(async (req, res) => {
     try {
-        // Filtering
-        const queryObj = { ...req.query };
-        const excludeFields = ["page", "sort", "limit", "fields"];
-        excludeFields.forEach((el) => delete queryObj[el]);
-        let queryStr = JSON.stringify(queryObj);
-        queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
+        const { _sort = "createdAt", _order = "asc", _limit = 10, _page = 1, _expand, price_min, price_max } = req.query;
+        const query = {};
+        if (price_min && price_max) {
 
-        let query = Product.find(JSON.parse(queryStr));
+            query.price = { $gte: price_min, $lte: price_max };
 
-        // Sorting
+        } else if (price_min) {
 
-        if (req.query.sort) {
-            const sortBy = req.query.sort.split(",").join(" ");
-            query = query.sort(sortBy);
+            query.price = { $gte: price_min };
+
+        } else if (price_max) {
+
+            query.price = { $lte: price_max };
+
         }
-        else {
-            query = query.sort("-createdAt");
-        }
+        const options = {
+            page: _page,
+            limit: _limit,
+            sort: {
+                [_sort]: _order === "desc" ? -1 : 1,
+            }
+        };
+        const populateOptions = _expand ? [{ path: "category" }] : [];
 
-        // limiting the fields
+        const respon = await Product.paginate({}, options)
+        if (respon.docs.length === 0) throw new Error("No products found");
 
-        if (req.query.fields) {
-            const fields = req.query.fields.split(",").join(" ");
-            query = query.select(fields);
-        }
-        else {
-            query = query.select("-__v");
-        }
-
-        // pagination
-
-        const page = req.query.page;
-        const limit = req.query.limit;
-        const skip = (page - 1) * limit;
-        query = query.skip(skip).limit(limit);
-
-        if (req.query.page) {
-            const productCount = await Product.countDocuments();
-            if (skip >= productCount) throw new Error("This Page does not exists");
-        }
-        const product = await query;
-        res.json(product);
+        const response = {
+            data: respon.docs,
+            pagination: {
+                currentPage: respon.page,
+                totalPages: respon.totalPages,
+                totalItems: respon.totalDocs,
+            },
+        };
+        return res.status(200).json(response);
     } catch (error) {
         throw new Error(error);
     }

@@ -2,13 +2,14 @@ import express from 'express';
 
 import { authMiddleware, isAdmin } from '../middlewares/authMiddlewares';
 import {
-    applyCoupon,
-    blockUser, createOrder, createUser,
+
+    blockUser, createOrderNew, createUser,
     deleteaUser,
     emptyCart,
     forgotPasswordToken,
     getAllOrders,
     getAllUsers,
+    getMyorder,
     getOrderByUserId,
     getOrders,
     getUserCart,
@@ -28,6 +29,8 @@ import {
     updatedUser,
     userCart
 } from '../controllers/userCtrl';
+import { checkout, paymentVerification } from '../controllers/payment';
+
 
 const router = express.Router();
 // 
@@ -40,15 +43,19 @@ router.put('/changepassword', authMiddleware, updatePassword)
 router.post('/login', loginUserCtrl)
 router.post('/login-admin', loginAdmin)
 router.post('/cart', authMiddleware, userCart)
-router.post('/cart/applycoupon', authMiddleware, applyCoupon)
-router.post('/cart/cash-order', authMiddleware, createOrder)
+router.post('/order/checkout', authMiddleware, checkout)
+router.post('/order/paymentVerification', authMiddleware, paymentVerification)
+
+// router.post('/cart/applycoupon', authMiddleware, applyCoupon)
+
 
 router.get('/all-users', getAllUsers)
-router.get('/refresh', handleRefreshToken)
+router.post('/refresh', handleRefreshToken)
 router.get('/logout', logout)
-router.get('/get-orders', authMiddleware, getOrders)
-router.get("/getallorders", authMiddleware, isAdmin, getAllOrders);
-router.get("/getorderbyuser/:id", authMiddleware, isAdmin, getOrderByUserId);
+router.get('/getmyorders', authMiddleware, getMyorder)
+// router.get("/getallorders", authMiddleware, isAdmin, getAllOrders);
+// router.get("/getorderbyuser/:id", authMiddleware, isAdmin, getOrderByUserId);
+
 router.get('/cart', authMiddleware, getUserCart)
 router.get('/wishlist', authMiddleware, getWishlist)
 router.get('/:id', authMiddleware, getaUser)
