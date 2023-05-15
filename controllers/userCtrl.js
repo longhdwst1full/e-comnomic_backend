@@ -181,12 +181,13 @@ const getaUser = asyncHandler(async (req, res) => {
 // get a single user
 export const getaUserClient = asyncHandler(async (req, res) => {
     const { _id } = req.user;
-    // console.log("check req.user ", req.user, _id)
+
     validateMongodb(_id);
     try {
-        //     const result = await User.findById(_id);
-        //     console.log(result)
-        res.json(req.user)
+        const result = await User.findById(_id);
+        
+        const { name, email, mobile, cart, wishlist, refreshToken, address, avatar } = result;
+        return res.json({ _id, name, email, mobile, cart, wishlist, refreshToken, address, avatar })
     } catch (error) {
         throw new Error(error)
     }
@@ -209,11 +210,15 @@ const updatedUser = asyncHandler(async (req, res) => {
     // check id 
     validateMongodb(_id)
     try {
+        
         const result = await User.findByIdAndUpdate(_id, {
+            name: req.body.name,
             firstName: req?.body?.firstName,
             lastName: req?.body?.lastName,
             email: req?.body?.email,
-            mobile: req?.body?.mobile
+            mobile: req?.body?.mobile,
+            avatar: req.body.avatar,
+            address: req?.body?.address
         }, {
             new: true
         })
