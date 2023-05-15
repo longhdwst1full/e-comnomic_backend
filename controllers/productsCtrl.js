@@ -66,21 +66,8 @@ const getaProduct = asyncHandler(async (req, res) => {
 
 const getAllProducts = asyncHandler(async (req, res) => {
     try {
-        const { _sort = "createdAt", _order = "asc", _limit = 10, _page = 1, _expand, price_min, price_max } = req.query;
-        const query = {};
-        if (price_min && price_max) {
+        const { _sort = "createdAt", _order = "asc", _limit = 10, _page = 1, _expand } = req.query;
 
-            query.price = { $gte: price_min, $lte: price_max };
-
-        } else if (price_min) {
-
-            query.price = { $gte: price_min };
-
-        } else if (price_max) {
-
-            query.price = { $lte: price_max };
-
-        }
         const options = {
             page: _page,
             limit: _limit,

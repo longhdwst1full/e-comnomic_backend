@@ -170,11 +170,23 @@ const getAllUsers = asyncHandler(async (req, res) => {
 // get a single user
 const getaUser = asyncHandler(async (req, res) => {
     const { id } = req.params
-    // check id 
     validateMongodb(id)
     try {
         const result = await User.findById(id)
         res.json(result)
+    } catch (error) {
+        throw new Error(error)
+    }
+})
+// get a single user
+export const getaUserClient = asyncHandler(async (req, res) => {
+    const { _id } = req.user;
+    // console.log("check req.user ", req.user, _id)
+    validateMongodb(_id);
+    try {
+        //     const result = await User.findById(_id);
+        //     console.log(result)
+        res.json(req.user)
     } catch (error) {
         throw new Error(error)
     }
@@ -276,7 +288,6 @@ const forgotPasswordToken = asyncHandler(async (req, res) => {
     try {
         // Generate a password reset token
         const resetToken = crypto.randomBytes(20).toString('hex');
- 
         // Set the token and expiration time on the user object
         user.passwordResetToken = crypto
             .createHash('sha256')
@@ -284,7 +295,6 @@ const forgotPasswordToken = asyncHandler(async (req, res) => {
             .digest('hex');
 
         user.passwordResetExpires = Date.now() + 600000; // 10 phút
-       
         await user.save();
         // const token = await user.createPasswordResetToken();
         const resetURL = `Hi, please follow this link ti reset your Password . This link is valid till 10 minutes from now . <a href="http://localhost:3000/reset-password/${resetToken}">Click here</a>`
@@ -385,51 +395,6 @@ const userCart = asyncHandler(async (req, res) => {
     }
 })
 
-// const userCart = asyncHandler(async (req, res) => {
-//     const { cart } = req.body;
-//     const { _id } = req.user;
-//     validateMongodb(_id);
-
-//     try {
-//         let products = []
-//         const user = await User.findById(_id);
-//         // check if user already hava product in cart
-//         const aleadyExistCart = await Cart.findOne({ orderby: user._id })
-
-//         if (aleadyExistCart) {
-//             aleadyExistCart.remove();
-
-//         }
-
-//         for (let i = 0; i < cart.length; i++) {
-//             let object = {};
-//             object.product = cart[i]._id;
-//             object.count = cart[i].count;
-//             object.color = cart[i].color;
-//             let getPrice = await Product.findById(cart[i]._id).select("price").exec();
-//             object.price = getPrice.price
-//             products.push(object);
-//         }
-
-//         let cartTotal = 0
-//         for (let i = 0; i < products.length; i++) {
-//             cartTotal = cartTotal + products[i].price * products[i].count;
-//         }
-
-//         let newCart = await new Cart({
-//             products,
-//             cartTotal,
-//             orderby: user?._id
-//         }).save();
-
-//         res.json(newCart);
-
-
-//     }
-//     catch (error) {
-//         throw new Error(error)
-//     }
-// })
 
 export const removeProductFromCart = asyncHandler(async (req, res) => {
     const { _id } = req.user

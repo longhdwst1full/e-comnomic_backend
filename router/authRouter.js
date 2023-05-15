@@ -15,6 +15,7 @@ import {
     getUserCart,
     getWishlist,
     getaUser,
+    getaUserClient,
     handleRefreshToken,
     loginAdmin,
     loginUserCtrl,
@@ -30,6 +31,8 @@ import {
     userCart
 } from '../controllers/userCtrl';
 import { checkout, paymentVerification } from '../controllers/payment';
+import { uploadPhoto, userAvatarUpload } from '../middlewares/uploadImages';
+import { uploadImages } from '../controllers/uploadCtrl';
 
 
 const router = express.Router();
@@ -48,8 +51,7 @@ router.post('/order/paymentVerification', authMiddleware, paymentVerification)
 
 // router.post('/cart/applycoupon', authMiddleware, applyCoupon)
 
-
-router.get('/profile/:id', authMiddleware, getaUser)
+router.get('/profile', authMiddleware, getaUserClient)
 router.get('/all-users', authMiddleware, isAdmin, getAllUsers)
 router.post('/refresh', handleRefreshToken)
 router.get('/logout', logout)
@@ -62,16 +64,18 @@ router.get('/wishlist', authMiddleware, getWishlist)
 
 router.put('/order/update-order/:id', authMiddleware, isAdmin, updateOrderStatus)
 
-router.delete('/empty-cart', authMiddleware, emptyCart)
+// router.delete('/empty-cart', authMiddleware, emptyCart)
 router.delete('/delete-product-cart', authMiddleware, removeProductFromCart)
 router.post('/update-product-cart/:cartItemId/:newQuantity', authMiddleware, updateQuantityProductFromCart)
 router.delete('/:id', authMiddleware, isAdmin, deleteaUser)
 // router.patch('/:id', updateaUser)
 
 router.put('/edit-user', authMiddleware, updatedUser)
+router.post('/avatar', authMiddleware, uploadPhoto.array("images", 1), userAvatarUpload, uploadImages)
 router.put('/save-address', authMiddleware, saveAddress)
 router.put("/block-user/:id", authMiddleware, isAdmin, blockUser)
 router.put("/unblock-user/:id", authMiddleware, isAdmin, unblockUser)
 
+router.get('/:id', authMiddleware, getaUser)
 
 export default router
