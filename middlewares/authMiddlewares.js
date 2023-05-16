@@ -15,23 +15,29 @@ const authMiddleware = asyncHandler(async (req, res, next) => {
             req.user = user;
             next();
         } catch (err) {
-
             if (err.name === "JsonWebTokenError") {
-                return res.json({
+                return res.status(200).json({
                     message: "Token không hợp lệ",
+                    err
                 });
             }
             if (err.name === "TokenExpiredError") {
                 return res.json({
                     message: "Token hết hạn",
+                    err
                 });
             }
 
-            throw new Error("Not authorized token expired, Please login again")
+            throw new Error({
+                message: "Not authorized token expired, Please login again",
+                err
+            })
         }
     }
     else {
-        throw new Error("There is no token attached to header")
+        throw new Error({
+            message: "There is no token attached to header"
+        })
     }
 
 })

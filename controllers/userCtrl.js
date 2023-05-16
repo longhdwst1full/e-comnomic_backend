@@ -51,7 +51,8 @@ const loginUserCtrl = asyncHandler(async (req, res) => {
             email: findUser?.email,
             mobile: findUser?.mobile,
             token: generateToken(findUser?._id),
-            refreshToken
+            refreshToken,
+            avatar:findUser.avatar
         }
 
         res.json(response);
@@ -101,34 +102,18 @@ const loginAdmin = asyncHandler(async (req, res) => {
 
 // handle refresh token
 const handleRefreshToken = asyncHandler(async (req, res) => {
-
     // refresh the damn token
-    const { refreshToken } = req.body
+    // const { refreshToken } = req.body
+    const { token: refreshToken } = req.params
     const user = await User.findOne({ refreshToken })
-
     if (!user || !refreshToken) throw new Error("No refresh token present in db or not matched");
-
-
 
     if (refreshToken && user) {
 
         const accessToken = generateToken(user?._id)
-        const updateUser = await User.findByIdAndUpdate(
-            user?._id,
-            {
-                token: accessToken
-
-            },
-            {
-                new: true
-            })
-        res.json(accessToken)
-
-
-
+      
+        res.json({ data: accessToken })
     }
-
-
 })
 
 //logout functionality
@@ -185,7 +170,7 @@ export const getaUserClient = asyncHandler(async (req, res) => {
     validateMongodb(_id);
     try {
         const result = await User.findById(_id);
-        
+
         const { name, email, mobile, cart, wishlist, refreshToken, address, avatar } = result;
         return res.json({ _id, name, email, mobile, cart, wishlist, refreshToken, address, avatar })
     } catch (error) {
@@ -210,7 +195,7 @@ const updatedUser = asyncHandler(async (req, res) => {
     // check id 
     validateMongodb(_id)
     try {
-        
+
         const result = await User.findByIdAndUpdate(_id, {
             name: req.body.name,
             firstName: req?.body?.firstName,

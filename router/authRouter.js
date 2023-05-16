@@ -53,7 +53,7 @@ router.post('/order/paymentVerification', authMiddleware, paymentVerification)
 
 router.get('/profile', authMiddleware, getaUserClient)
 router.get('/all-users', authMiddleware, isAdmin, getAllUsers)
-router.post('/refresh', handleRefreshToken)
+router.get('/refresh/:token', handleRefreshToken)
 router.get('/logout', logout)
 router.get('/getmyorders', authMiddleware, getMyorder)
 // router.get("/getallorders", authMiddleware, isAdmin, getAllOrders);

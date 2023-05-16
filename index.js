@@ -20,8 +20,11 @@ import cors from 'cors'
 dotenv.config()
 
 const app = express()
-app.use(cors())
 dbConnect()
+app.use(cors({
+    origin: 'http://localhost:3000',
+    credentials: true,
+  }));
 app.use(morgan("dev"))
 app.use(bodyParser.json())
 app.use(cookieParser())
