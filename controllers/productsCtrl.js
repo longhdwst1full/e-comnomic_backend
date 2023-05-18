@@ -65,20 +65,35 @@ const getaProduct = asyncHandler(async (req, res) => {
 })
 
 const getAllProducts = asyncHandler(async (req, res) => {
+    const { _sort = "createdAt", _order = "asc", _limit = 10, _page = 1, _expand, _categoryId, priceMin, priceMax } = req.query;
+
+    const filter = {};
+
+
+
+    if (priceMin && priceMax) {
+        filter.price = { $gt: priceMin, $lte: priceMax };
+    } else if (priceMin) {
+        filter.price = { $gt: priceMin };
+    } else if (priceMax) {
+        filter.price = { $lt: priceMax };
+    }
+    const populateOptions = _categoryId ? [{ path: "categoryId", model: "PCategory" }] : [];
+
+    const options = {
+        page: _page,
+        limit: _limit,
+        sort: {
+            [_sort]: _order === "desc" ? -1 : 1,
+        }
+
+    }
     try {
-        const { _sort = "createdAt", _order = "asc", _limit = 10, _page = 1, _expand } = req.query;
-
-        const options = {
-            page: _page,
-            limit: _limit,
-            sort: {
-                [_sort]: _order === "desc" ? -1 : 1,
-            }
-        };
-        const populateOptions = _expand ? [{ path: "category" }] : [];
-
-        const respon = await Product.paginate({}, options)
-        if (respon.docs.length === 0) throw new Error("No products found");
+        const respon = await Product.paginate(filter, { ...options, populate: populateOptions })
+        if (respon.docs.length === 0) res.status(200).json({
+            code: 404,
+            message: "No products found"
+        });
 
         const response = {
             data: respon.docs,
